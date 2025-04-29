@@ -118,7 +118,7 @@ module asteroid # (parameter xloc_start = 320, //Adjust in top module with pseud
 	      if(broken) begin
 	           broken <= 0;
 	           inc_score <= 1;
-	           //xloc = random between a and b 
+	           //while(xloc is close enough to enough asteroid AND y positions are close enough to matter)xloc = random between a and b ,
 	           //yloc = 60
 	           //speed = speed + 1 if(score high enough) or enough time passes
 	
