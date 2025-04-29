@@ -23,14 +23,19 @@ input wire	     clk, // 100 MHz board clock on Nexys A7
    wire	      hblank;
    wire	      vblank;
    wire	      pixpulse;
-   wire       wall = ((hcount < 132) & (hcount > 137) & (hcount >408) & (hcount < 413));
+   wire       wall = ((hcount > 132) & (hcount < 137) & (hcount >408) & (hcount < 413));
                       //Gives boundaries for thin wall on sides. Note that there aren't provisions
                       //for walls on the top or bottom.
    wire       empty;
+   wire       empty_ship = wall | ((|draw_asteroids[19:0]));
+   
    
    wire       draw_ship,draw_score;
-   wire [3:0] draw_asteroids;//Arbitrary 4 bits, didn't think more than 16 could be on screen
-   wire [3:0] broken_asteroids;//Broken and draw for blocks was a package deal
+   wire [1:0] draw_bullets;
+   //if (&draw_bullets) don't draw
+   wire [19:0] draw_asteroids;//Arbitrary 4 bits, didn't think more than 16 could be on screen
+   wire [19:0] broken_asteroids;//Broken and draw for blocks was a package deal
+   wire all_broken;
    
    wire [7:0] timer_RNG;//Use for pseudo random calculations
    wire [7:0] display = 8'b00000000;
@@ -38,8 +43,9 @@ input wire	     clk, // 100 MHz board clock on Nexys A7
    wire move;
     reg [11:0] current_pixel;
    reg vblank_d1;
-   wire [7:0] scores;
-   
+   reg [7:0] scores;
+   wire [1:0] lives;
+   wire [2:0] inc_scores;//Asteroids
    localparam SHIP_COLOR = 12'hfd0;//Yellow
    localparam SCORE_COLOR = 12'hfff;//White
    localparam BULLET_COLOR = 12'h0ff;//Turqouise
@@ -111,6 +117,26 @@ score #() score1(
     .score (scores),
     .draw_score(draw_score)
 );
+
+
+   always @(posedge clk or posedge rst) 
+     begin
+        if(rst) begin
+            vblank_d1 <= 0;
+            scores <= 0;
+        end else if (pixpulse)
+             begin
+        //if (inc_score) scores = scores + 1;
+             end
+             
+             
+             
+             //FSM Part
+             
+             
+             //If lives output from ship module == 0, 
+     end
+
     
     assign vgaRed   = (~hblank && ~vblank) ? current_pixel[11:8] : 4'b0;
    assign vgaGreen = (~hblank && ~vblank) ? current_pixel[7:4] : 4'b0;
