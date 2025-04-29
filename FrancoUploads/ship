@@ -1,0 +1,125 @@
+`timescale 1ns / 1ps
+
+
+module ship # (parameter xloc_start=320,
+	      parameter yloc_start=400)(
+
+    input	     clk, 
+    input	     pixpulse, 
+    input	     rst,
+    input [9:0]	     hcount,
+    input [9:0]	     vcount, 
+    input	     empty,
+    input	     move, 
+    input mU,input mD,input mL,input mR,
+    output	     draw_ship, // is the ship being drawn here?
+    output reg [9:0] xloc,
+    output reg [9:0] yloc 
+    );
+    
+       reg [3:0] movement;
+       reg [5:0]			 occupied_lft;
+         reg [5:0]			 occupied_rgt;
+        reg [5:0]			 occupied_bot;
+        reg [5:0]			 occupied_top;
+        reg				 xdir, ydir;
+        reg				 update_neighbors;
+   assign draw_ship = (hcount <= xloc+13) & (hcount >= xloc-13) & (vcount <= yloc+13) & (vcount >= yloc-13) ?  1 : 0;
+
+    always @(posedge clk or posedge rst)
+     begin
+	if (rst) begin
+	   occupied_lft <= 5'b0;
+	   occupied_rgt <= 5'b0;
+	   occupied_bot <= 5'b0;
+	   occupied_top <= 5'b0;
+	end else if (pixpulse) begin  // only make changes when pixpulse is high
+	   if (update_neighbors) begin
+	      occupied_lft <= 5'b0;
+	      occupied_rgt <= 5'b0;
+	      occupied_bot <= 5'b0;
+	      occupied_top <= 5'b0;
+	   end else if (~empty) begin
+	      if (vcount >= yloc-14 && vcount <= yloc+14) 
+		if (hcount == xloc+14)
+		  occupied_rgt[(yloc-vcount+14)] <= 1'b1;  // LSB is at bottom
+		else if (hcount == xloc-14)
+		  occupied_lft[(yloc-vcount+14)] <= 1'b1;
+	      
+	      if (hcount >= xloc-14 && hcount <= xloc+14) 
+		if (vcount == yloc+14)
+		  occupied_bot[(xloc-hcount+14)] <= 1'b1;  // LSB is at right
+		else if (vcount == yloc-14)
+		  occupied_top[(xloc-hcount+14)] <= 1'b1;
+	   end
+	end
+     end	      
+
+     always @(posedge clk or posedge rst)
+     begin
+	if (rst) begin
+	   xloc <= xloc_start;
+	   yloc <= yloc_start;
+	   update_neighbors <= 0;
+	end else if (pixpulse) begin
+	   update_neighbors <= 0; // default
+	   if (move) begin
+            movement = {mU,mD,mL,mR};
+        case(movement)
+        4'b0000,4'b0011,4'b1100, 4'b1111://No movement
+         begin
+            xloc<=xloc;
+            yloc<=yloc;  
+        end
+        //Mono-directional movement
+        4'b0001,4'b1101: begin//Right alone
+            if(occupied_rgt) xloc<=xloc;
+            else xloc<=xloc+2;
+        end
+        4'b0010,4'b1110: begin//Left alone
+            if(occupied_lft) xloc<=xloc;
+            else xloc<=xloc-2;
+        end
+        4'b0100,4'b0111: begin//Down Alone
+            if(occupied_bot) yloc<=yloc;
+            else yloc<=yloc+2;
+        end
+        4'b1000,4'b1011: begin//Up Alone
+            if(occupied_top) yloc<=yloc;
+            else yloc<=yloc-2;
+        end
+        //Bi-directional movement
+        4'b1010:begin//Up and Left
+            if(occupied_top) yloc<=yloc;
+            else yloc<=yloc-2;
+            if(occupied_lft) xloc<=xloc;
+            else xloc<=xloc-2;
+        end
+        4'b0101: begin//Down and Right
+        if(occupied_bot) yloc<=yloc;
+            else yloc<=yloc+2;
+            if(occupied_rgt) xloc<=xloc;
+            else xloc<=xloc+2;
+        end
+        4'b1001: begin//Up and Right
+        if(occupied_rgt) xloc<=xloc;
+            else xloc<=xloc+2;
+            if(occupied_top) yloc<=yloc;
+            else yloc<=yloc-2;
+        end
+        4'b0110: begin//Down and Left
+        if(occupied_bot) yloc<=yloc;
+            else yloc<=yloc+2;
+        if(occupied_lft) xloc<=xloc;
+            else xloc<=xloc-2;
+        end
+        endcase
+	      update_neighbors <= 1;
+	   end 
+	end 
+     end
+   
+    
+    
+    
+endmodule
