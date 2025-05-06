@@ -48,7 +48,7 @@ module ball #(parameter xloc_start=320,
    always @(posedge clk or posedge rst)
      begin
 	if (rst) begin
-	   occupied_lft <= 5'b0;
+	   occupied_lft <= 5'b0;//ysize_div_2*2 bits
 	   occupied_rgt <= 5'b0;
 	   occupied_bot <= 5'b0;
 	   occupied_top <= 5'b0;
