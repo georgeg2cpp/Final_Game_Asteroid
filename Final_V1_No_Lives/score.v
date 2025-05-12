@@ -1,8 +1,9 @@
-module score #(parameter xloc = 20, parameter yloc = 20)
+module score #(parameter xstart = 20, parameter ystart = 20)
 (
     input         clk,        // 100 MHz system clock
     input         pixpulse,   // every 4 clocks for 25MHz pixel rate
     input         rst,
+    input [1:0] state_set,
     input  [9:0]  hcount,     // x-location where we are drawing
     input  [9:0]  vcount,     // y-location where we are drawing
     input  [8:0]  score,
@@ -12,9 +13,21 @@ module score #(parameter xloc = 20, parameter yloc = 20)
     reg [2:0] row;
     reg [3:0] digit;
     wire [11:0] score_bcd;
-
+    reg [9:0] yloc, xloc;
     (* rom_style = "block" *) reg [7:0] chr_pix;
-
+    always @(posedge clk) begin
+        case(state_set) 
+            2'b10: begin
+                xloc <= 300;
+                yloc <= 340;
+            end
+            default: begin
+                xloc <= xstart;
+                yloc <= ystart;
+            end
+        
+     endcase
+     end
     // Draw enable wires
     wire draw_score_100, draw_score_10, draw_score_1;
 
@@ -148,3 +161,4 @@ module score #(parameter xloc = 20, parameter yloc = 20)
     end
 
 endmodule
+
