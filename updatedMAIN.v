@@ -30,11 +30,12 @@ module top_vga(
    reg [7:0] sc = 8'b00000000;
    wire [5:0] scored;
    wire	      move;
-   reg [1:0]lives = 0;
+	reg [1:0]lives = 2'b11;
    reg [11:0] current_pixel;
    reg vblank_d1;
    wire empty_cond;
-   
+wire life_det;
+	
     reg [1:0] FSM;     // initial state is 0
     wire [2:0] collision; // used to detect if the ball has collided with the ship
     wire next_collison = 0; // used to
@@ -193,6 +194,7 @@ paddle #(320,400,0,0) u_pad(
 		  .hcount		(hcount[9:0]),
 		  .vcount		(vcount[9:0]),
 		  .empty		(empty & ship_border),
+	.dec_lives (life_det),
 		  .move			(move));
 
 	
@@ -282,6 +284,7 @@ score #(80,420) s1(
         PLAY_GAME: begin
 //            if(lives == CRASH) next_state <= GAME_OVER;
 //            else if(|collision) lives <= lives - 1;
+		if(life_det) lives <= lives - 1;
                if((lives == CRASH)) next_state <= GAME_OVER;
         end
         GAME_OVER: begin
