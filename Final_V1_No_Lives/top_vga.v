@@ -238,6 +238,7 @@ score #(80,420) s1(
    	.hcount(hcount[9:0]), // x-location where we are drawing
     .vcount (vcount[9:0]), // y-location where we are drawing
     .score (sc),
+    .state_set(FSM),
     .draw_score (draw_score)
     );
     
