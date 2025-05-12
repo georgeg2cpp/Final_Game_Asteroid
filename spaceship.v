@@ -15,6 +15,7 @@ module spaceship #(parameter xloc_start= 375,
     input	     move, // signal to update the location of the ball
     input mU, input mD, input mL, input mR, // movement from the input
     output	     draw_ship, // is the ball being drawn here?
+	   output dec_lives,
     output reg [9:0] xloc, // x-location of the ball
     output reg [9:0] yloc // y-location of the ball
     );
@@ -225,6 +226,8 @@ module spaceship #(parameter xloc_start= 375,
         
         endcase
 	      update_neighbors <= 1;
+		   if(occupied_top | occupied_lft | occupied_rgt) dec_lives <= 1;
+		   else dec_lives <= 0;
 	   end 
 	end 
      end
