@@ -1,8 +1,9 @@
-module score #(parameter xloc = 20, parameter yloc = 20)
+module score #(parameter xstart = 20, parameter ystart = 20)
 (
     input         clk,        // 100 MHz system clock
     input         pixpulse,   // every 4 clocks for 25MHz pixel rate
     input         rst,
+    input   [1:0]   state_set,
     input  [9:0]  hcount,     // x-location where we are drawing
     input  [9:0]  vcount,     // y-location where we are drawing
     input  [7:0]  score,
@@ -20,6 +21,17 @@ module score #(parameter xloc = 20, parameter yloc = 20)
 
     // Digit ROM lookup
     always @(posedge clk) begin
+        case(state_set) 
+            2'b10: begin
+                xloc <= 300;
+                yloc <= 340;
+            end
+            default: begin
+                xloc <= xstart;
+                yloc <= ystart;
+            end
+
+        endcase 
         case ({1'b0, digit, row})
             8'h00: chr_pix <= 8'b00000000; // '0'
             8'h01: chr_pix <= 8'b00111100;
